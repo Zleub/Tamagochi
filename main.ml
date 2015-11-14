@@ -2,56 +2,61 @@
 * @Author: adebray
 * @Date:   2015-11-13 22:36:55
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-14 03:19:22
+* @Last Modified time: 2015-11-14 07:53:17
 *)
 
+let quadlist = [
+	Sdlvideo.rect 0 0 30 30 ;
+	Sdlvideo.rect 30 0 30 30 ;
+	Sdlvideo.rect 0 30 30 30 ;
+]
+
 let init () =
+	(* Sdlwm.grab_input true ; *)
 	let screen = Sdlvideo.set_video_mode 400 400 [] in
-	let image = Sdlloader.load_image "assets/img.png" in
+
+	Sdlvideo.fill_rect screen (Sdlvideo.map_RGB screen (214, 255, 203)) ;
+
+	let image = Sdlloader.load_image "assets/mytama.png" in
+	let quad = List.nth quadlist 0 in
 	let position_of_image = Sdlvideo.rect 0 0 42 42 in
-	Sdlvideo.blit_surface ~dst_rect:position_of_image ~src:image ~dst:screen ();
+	Sdlvideo.blit_surface ~src_rect:quad ~dst_rect:position_of_image ~src:image ~dst:screen ();
 
-
-	let font = Sdlttf.open_font "fonts/courier.ttf" 24 in
-	let text = Sdlttf.render_text_blended font "Enjoy!" ~fg:Sdlvideo.white in
+	let font = Sdlttf.open_font "fonts/courier.ttf" 16 in
+	let text = Sdlttf.render_text_blended font "Enjoy!" ~fg:Sdlvideo.black in
 	let position_of_text = Sdlvideo.rect 300 0 300 300 in
 	Sdlvideo.blit_surface ~dst_rect:position_of_text ~src:text ~dst:screen ();
 
+	let healthmod = new Meter.health screen font in
+	healthmod#draw ;
 
-	let rec run () =
-		match Sdlevent.wait_event () with
-		| Sdlevent.KEYDOWN x -> print_endline (String.make 1 x.keycode)
-		| Sdlevent.QUIT -> print_endline "bye"
-		| event ->
-			Sdlvideo.flip screen;
-			print_endline (Sdlevent.string_of_event event) ;
-			run ()
-	in run ()
+	let matchEvent = function
+	| Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_ESCAPE } -> print_endline "keydown"
+	| Sdlevent.QUIT -> print_endline "bye" ; raise Exit
+	| event -> print_endline (Sdlevent.string_of_event event) ;
+	in
+	let rec run time =
+
+		if (time mod 60) = 59 then
+			Sdlvideo.blit_surface ~src_rect:(List.nth quadlist 1) ~dst_rect:position_of_image ~src:image ~dst:screen ();
+(* 		if (time mod 120) = 0 then
+			Sdlvideo.blit_surface ~src_rect:(List.nth quadlist 1) ~dst_rect:position_of_image ~src:image ~dst:screen ();
+ *)		Sdlvideo.flip screen;
+
+		Sdlevent.pump () ;
+		match Sdlevent.poll () with
+		| Some event -> matchEvent event ; run (time + 1)
+		| None -> run (time + 1)
+	in try run 0 with
+	| Exit -> ()
 
 let main () =
-	Sdl.init [`VIDEO] ;
+	Sdl.init [`VIDEO ] ;
 	at_exit Sdl.quit ;
 	Sdlttf.init ();
 	at_exit Sdlttf.quit;
-    let printEventKind = function
-      | Sdlevent.ACTIVE_EVENT -> print_endline "ACTIVE_EVENT"
-      | Sdlevent.KEYDOWN_EVENT -> print_endline "KEYDOWN_EVENT"
-      | Sdlevent.KEYUP_EVENT -> print_endline "KEYUP_EVENT"
-      | Sdlevent.MOUSEMOTION_EVENT -> print_endline "MOUSEMOTION_EVENT"
-      | Sdlevent.MOUSEBUTTONDOWN_EVENT -> print_endline "MOUSEBUTTONDOWN_EVENT"
-      | Sdlevent.MOUSEBUTTONUP_EVENT -> print_endline "MOUSEBUTTONUP_EVENT"
-      | Sdlevent.JOYAXISMOTION_EVENT -> print_endline "JOYAXISMOTION_EVENT"
-      | Sdlevent.JOYBALL_EVENT -> print_endline "JOYBALL_EVENT"
-      | Sdlevent.JOYHAT_EVENT -> print_endline "JOYHAT_EVENT"
-      | Sdlevent.JOYBUTTONDOWN_EVENT -> print_endline "JOYBUTTONDOWN_EVENT"
-      | Sdlevent.JOYBUTTONUP_EVENT -> print_endline "JOYBUTTONUP_EVENT"
-      | Sdlevent.QUIT_EVENT -> print_endline "QUIT_EVENT"
-      | Sdlevent.SYSWM_EVENT -> print_endline "SYSWM_EVENT"
-      | Sdlevent.RESIZE_EVENT -> print_endline "RESIZE_EVENT"
-      | Sdlevent.EXPOSE_EVENT -> print_endline "EXPOSE_EVENT"
-      | Sdlevent.USER_EVENT -> print_endline "USER_EVENT"
-     in
-    List.iter printEventKind (Sdlevent.of_mask (Sdlevent.get_enabled_events ())) ;
+
+	Sdlevent.Old.set_keyboard_event_func (fun a b c d -> print_endline (string_of_int c));
 	init ()
 
 let () = main ()
