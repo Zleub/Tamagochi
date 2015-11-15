@@ -4,7 +4,7 @@ SOURCES	= classes/Tamagotchi.ml \
 		classes/Meter.ml \
 		main.ml
 LIBS	= bigarray sdl sdlloader sdlttf
-INCDIRS	= +sdl
+INCDIRS	= /nfs/zfs-student-2/users/2013/adebray/.opam/system/lib/sdl
 OCAMLLDFLAGS = -cclib "-framework Cocoa"
 TREADS	= true
 include OCamlMakefile
