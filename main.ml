@@ -2,7 +2,7 @@
 * @Author: adebray
 * @Date:   2015-11-13 22:36:55
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-15 03:12:49
+* @Last Modified time: 2015-11-15 21:39:05
 *)
 
 type mods = {
@@ -26,13 +26,24 @@ let init () =
 		happyness = new Meter.happyness screen font
 	} in
 
-	let rec matchEvent time = function
+(* 	let rec matchEvent time = function
 	| Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_x = x_mouse ; Sdlevent.mbe_y = y_mouse } ->
 		print_endline (string_of_int x_mouse)
 	| Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_ESCAPE } -> print_endline "keydown"
 	| Sdlevent.QUIT -> print_endline "bye" ; raise Exit
 	| event -> print_endline (Sdlevent.string_of_event event)
-	and run time hamtaro modList =
+ *)	let rec run time hamtaro modList =
+		Sdlevent.pump () ;
+
+		let matchEvent time = function
+		| Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_x = x_mouse ; Sdlevent.mbe_y = y_mouse } ->
+			print_endline (string_of_int x_mouse)
+		| Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_ESCAPE } ->
+			print_endline "bye" ; raise Exit
+		| Sdlevent.QUIT ->
+			print_endline "bye" ; raise Exit
+		| event ->
+			print_endline (Sdlevent.string_of_event event) in
 		clearScreen () ;
 		hamtaro#draw ;
 		modList.health#draw ;
@@ -41,17 +52,17 @@ let init () =
 		modList.happyness#draw ;
 		Sdlvideo.flip screen ;
 
-		Sdlevent.pump () ;
-
 		let bundle = {
 			health = (modList.health#update (int_of_float (cos ((float_of_int time) /. 21.) *. 2.))) ;
 			energy = modList.energy ;
 			hygiene = modList.hygiene ;
 			happyness = modList.happyness
 		} in
+		let rec loop () =
 		match Sdlevent.poll () with
-		| Some event -> matchEvent time event ; run (time + 1) hamtaro#update bundle
-		| None -> run (time + 1) hamtaro#update bundle
+		| Some event -> matchEvent time event ; loop ()
+		| None -> ()
+		in loop () ; run (time + 1) hamtaro#update bundle
 	in try run 0 hamtaro modList with
 	| Exit -> ()
 	| Meter.Lost -> print_endline "You lost"
