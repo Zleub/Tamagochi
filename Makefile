@@ -1,9 +1,10 @@
 RESULT	= Tamagochi
 SOURCES	= classes/Tamagotchi.ml \
+		classes/Button.ml \
 		classes/Meter.ml \
 		main.ml
-LIBS	= bigarray sdl
-INCDIRS	=
-OCAMLLDFLAGS = -cclib "-framework Cocoa -framework SDL2"
+LIBS	= bigarray sdl sdlloader sdlttf
+INCDIRS	= +sdl
+OCAMLLDFLAGS = -cclib "-framework Cocoa"
 TREADS	= true
 include OCamlMakefile

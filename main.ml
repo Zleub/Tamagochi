@@ -2,53 +2,59 @@
 * @Author: adebray
 * @Date:   2015-11-13 22:36:55
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-14 07:53:17
+* @Last Modified time: 2015-11-15 03:12:49
 *)
 
-let quadlist = [
-	Sdlvideo.rect 0 0 30 30 ;
-	Sdlvideo.rect 30 0 30 30 ;
-	Sdlvideo.rect 0 30 30 30 ;
-]
+type mods = {
+	health : Meter.health ;
+	energy : Meter.energy ;
+	hygiene : Meter.hygiene ;
+	happyness : Meter.happyness
+	}
 
 let init () =
 	(* Sdlwm.grab_input true ; *)
-	let screen = Sdlvideo.set_video_mode 400 400 [] in
-
-	Sdlvideo.fill_rect screen (Sdlvideo.map_RGB screen (214, 255, 203)) ;
-
-	let image = Sdlloader.load_image "assets/mytama.png" in
-	let quad = List.nth quadlist 0 in
-	let position_of_image = Sdlvideo.rect 0 0 42 42 in
-	Sdlvideo.blit_surface ~src_rect:quad ~dst_rect:position_of_image ~src:image ~dst:screen ();
-
+	let screen = Sdlvideo.set_video_mode 530 400 [] in
 	let font = Sdlttf.open_font "fonts/courier.ttf" 16 in
-	let text = Sdlttf.render_text_blended font "Enjoy!" ~fg:Sdlvideo.black in
-	let position_of_text = Sdlvideo.rect 300 0 300 300 in
-	Sdlvideo.blit_surface ~dst_rect:position_of_text ~src:text ~dst:screen ();
 
-	let healthmod = new Meter.health screen font in
-	healthmod#draw ;
+	let clearScreen () = Sdlvideo.fill_rect screen (Sdlvideo.map_RGB screen (214, 255, 203)) in
+	let hamtaro = new Tamagotchi.hamtaro "assets/mytamabig.png" screen in
+	let modList = {
+		health = new Meter.health screen font ;
+		energy = new Meter.energy screen font ;
+		hygiene = new Meter.hygiene screen font ;
+		happyness = new Meter.happyness screen font
+	} in
 
-	let matchEvent = function
+	let rec matchEvent time = function
+	| Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_x = x_mouse ; Sdlevent.mbe_y = y_mouse } ->
+		print_endline (string_of_int x_mouse)
 	| Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_ESCAPE } -> print_endline "keydown"
 	| Sdlevent.QUIT -> print_endline "bye" ; raise Exit
-	| event -> print_endline (Sdlevent.string_of_event event) ;
-	in
-	let rec run time =
-
-		if (time mod 60) = 59 then
-			Sdlvideo.blit_surface ~src_rect:(List.nth quadlist 1) ~dst_rect:position_of_image ~src:image ~dst:screen ();
-(* 		if (time mod 120) = 0 then
-			Sdlvideo.blit_surface ~src_rect:(List.nth quadlist 1) ~dst_rect:position_of_image ~src:image ~dst:screen ();
- *)		Sdlvideo.flip screen;
+	| event -> print_endline (Sdlevent.string_of_event event)
+	and run time hamtaro modList =
+		clearScreen () ;
+		hamtaro#draw ;
+		modList.health#draw ;
+		modList.energy#draw ;
+		modList.hygiene#draw ;
+		modList.happyness#draw ;
+		Sdlvideo.flip screen ;
 
 		Sdlevent.pump () ;
+
+		let bundle = {
+			health = (modList.health#update (int_of_float (cos ((float_of_int time) /. 21.) *. 2.))) ;
+			energy = modList.energy ;
+			hygiene = modList.hygiene ;
+			happyness = modList.happyness
+		} in
 		match Sdlevent.poll () with
-		| Some event -> matchEvent event ; run (time + 1)
-		| None -> run (time + 1)
-	in try run 0 with
+		| Some event -> matchEvent time event ; run (time + 1) hamtaro#update bundle
+		| None -> run (time + 1) hamtaro#update bundle
+	in try run 0 hamtaro modList with
 	| Exit -> ()
+	| Meter.Lost -> print_endline "You lost"
 
 let main () =
 	Sdl.init [`VIDEO ] ;
