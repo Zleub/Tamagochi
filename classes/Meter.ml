@@ -2,7 +2,7 @@
 * @Author: adebray
 * @Date:   2015-11-14 06:08:52
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-15 03:14:01
+* @Last Modified time: 2015-11-16 21:44:07
 *)
 
 exception Lost
@@ -18,12 +18,12 @@ object (self)
 
 	method update diff =
 		(* print_endline (string_of_int diff) ; *)
-		if _state = 0
+		if _state + diff <= 0
 			then raise Lost
-		else if _state - diff > 100 then
+		else if _state + diff > 100 then
 			{< _state = 100 >}
 		else
-			{< _state = (_state - diff) >}
+			{< _state = (_state + diff) >}
 
 	method draw = begin
 		Sdlvideo.blit_surface
@@ -44,6 +44,7 @@ object (self)
 	inherit base renderer font "Health" (30, 10) as super
 
 	val button = new Button.base renderer font "EAT" (30, 210)
+	method get_button = button
 
 	method draw = super#draw ; button#draw
 end
@@ -53,6 +54,7 @@ object (self)
 	inherit base renderer font "Energy" (160, 10) as super
 
 	val button = new Button.base renderer font "THUNDER" (160, 210)
+	method get_button = button
 
 	method draw = super#draw ; button#draw
 end
@@ -62,6 +64,7 @@ object (self)
 	inherit base renderer font "Hygiene" (290, 10) as super
 
 	val button = new Button.base renderer font "BATH" (290, 210)
+	method get_button = button
 
 	method draw = super#draw ; button#draw
 end
@@ -71,6 +74,7 @@ object (self)
 	inherit base renderer font "Happyness" (420, 10) as super
 
 	val button = new Button.base renderer font "KILL" (420, 210)
+	method get_button = button
 
 	method draw = super#draw ; button#draw
 end
