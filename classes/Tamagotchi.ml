@@ -2,7 +2,7 @@
 * @Author: adebray
 * @Date:   2015-11-14 07:41:46
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-16 23:16:49
+* @Last Modified time: 2015-11-17 00:22:18
 *)
 
 let quadlist = [
@@ -37,7 +37,7 @@ let animationList = [
 class hamtaro file screen =
 object (self)
 
-	val _rate = 21
+	val _rate = 4
 	val _timer = 0
 	val _animation = 0
 	val _animationIndex = 0

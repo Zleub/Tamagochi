@@ -2,7 +2,7 @@
 * @Author: adebray
 * @Date:   2015-11-16 21:01:15
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-16 22:00:18
+* @Last Modified time: 2015-11-16 23:42:26
 *)
 
 type modList = {
@@ -13,12 +13,10 @@ type modList = {
 }
 
 let init renderer font = {
-
 	health = new Meter.health renderer font ;
 	energy = new Meter.energy renderer font ;
 	hygiene = new Meter.hygiene renderer font ;
 	happyness = new Meter.happyness renderer font
-
 }
 
 let update time modList = {
@@ -33,42 +31,21 @@ let draw modList = modList.health#draw ;
 	modList.hygiene#draw ;
 	modList.happyness#draw
 
-let do_eat modList = {
-	health = modList.health#update 25 ;
-	energy = modList.energy#update (-10) ;
-	hygiene = modList.hygiene#update (-20) ;
-	happyness = modList.happyness#update 5
-}
-
-let do_thunder modList = {
-	health = modList.health#update (-20) ;
-	energy = modList.energy#update 25 ;
-	hygiene = modList.hygiene ;
-	happyness = modList.happyness#update (-20)
-}
-
-let do_bath modList = {
-	health = modList.health#update (-20) ;
-	energy = modList.energy#update (-10) ;
-	hygiene = modList.hygiene#update 25;
-	happyness = modList.happyness#update 5
-}
-
-let do_kill modList = {
-	health = modList.health#update (-20) ;
-	energy = modList.energy#update (-10) ;
-	hygiene = modList.hygiene ;
-	happyness = modList.happyness#update 20
+let do_action modList hea ene hyg hap = {
+	health = modList.health#update hea ;
+	energy = modList.energy#update ene ;
+	hygiene = modList.hygiene#update hyg ;
+	happyness = modList.happyness#update hap
 }
 
 let matchAction point modList =
 	if modList.health#get_button#collides point then
-		do_eat modList
+		do_action modList 25 (-10) (-20) 5
 	else if modList.energy#get_button#collides point then
-		do_thunder modList
+		do_action modList (-20) 25 0 (-20)
 	else if modList.hygiene#get_button#collides point then
-		do_bath modList
+		do_action modList (-20) (-10) 25 5
 	else if modList.happyness#get_button#collides point then
-		do_kill modList
+		do_action modList (-20) (-10) 0 20
 	else
 		modList
