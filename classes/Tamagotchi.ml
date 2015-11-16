@@ -2,7 +2,7 @@
 * @Author: adebray
 * @Date:   2015-11-14 07:41:46
 * @Last Modified by:   adebray
-* @Last Modified time: 2015-11-17 00:22:18
+* @Last Modified time: 2015-11-17 00:37:56
 *)
 
 let quadlist = [
@@ -27,17 +27,17 @@ let quadlist = [
 
 let animationList = [
 	[ 3 ; 4 ; 5 ; 6 ; 3 ; 3] ;
-	[ 0 ; 0 ; 0 ; 0 ] ;
-	[ 0 ; 0 ; 0 ; 1 ; 1 ; 1 ] ;
-	[ 0 ; 0 ; 0 ; 1 ; 1 ; 2 ; 0 ] ;
-	[ 0 ; 7 ; 7 ; 7 ; 8 ; 8 ; 9 ; 9 ] ;
+	[ 0 ; 0 ; 0 ; 0; 0 ; 0 ; 0 ] ;
+	[ 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 1 ; 1 ; 1 ] ;
+	[ 0 ; 0 ; 0 ; 0 ; 1 ; 1 ; 1 ; 1 ; 2 ; 2 ; 0 ] ;
+	[ 0 ; 0 ; 0 ; 0 ; 0 ; 7 ; 7 ; 7 ; 8 ; 8 ; 9 ; 9 ] ;
 	[ 10 ; 11 ; 12 ; 13 ; 10 ; 10]
 ]
 
 class hamtaro file screen =
 object (self)
 
-	val _rate = 4
+	val _rate = 1
 	val _timer = 0
 	val _animation = 0
 	val _animationIndex = 0
@@ -56,7 +56,7 @@ object (self)
 		else if _timer = _rate then
 			begin
 				if (fst _pos) < 100 then
-					{< _timer = 0 ; _animationIndex = 0 ; _animation = (Random.int ((List.length animationList)) - 1) + 1 >}
+					{< _timer = 0 ; _animationIndex = 0 ; _animation = (Random.int ((List.length animationList) - 1)) + 1 >}
 				else if (fst _pos) > 300 then
 					{< _timer = 0 ; _animationIndex = 0 ; _animation = Random.int ((List.length animationList) - 1) >}
 				else
